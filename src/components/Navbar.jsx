@@ -42,8 +42,11 @@ function Navbar() {
       <div className="flex justify-between items-center">
         <Link to="/" className="text-gray-700 dark:text-gray-200 hover:text-blue-500">Logo</Link>
         <div className="flex space-x-4 w-full justify-end">
-          <Link to="/dashboard" className="text-gray-700 dark:text-gray-200 hover:text-blue-500">Dashboard</Link>
-          <Link to="/profile" className="text-gray-700 dark:text-gray-200 hover:text-blue-500">Profile</Link>
+          <Link to="/" className="text-gray-700 dark:text-gray-200 hover:text-blue-500">Home</Link>
+          {/* <Link to="/dashboard" className="text-gray-700 dark:text-gray-200 hover:text-blue-500">Dashboard</Link> */}
+          {/* <Link to="/my-instances" className="text-gray-700 dark:text-gray-200 hover:text-blue-500">My Instances</Link> */}
+          <Link to="/integrations" className="text-gray-700 dark:text-gray-200 hover:text-blue-500">Integrations</Link>
+          <Link to="/schedule" className="text-gray-700 dark:text-gray-200 hover:text-blue-500">Schedule</Link>
         </div>
 
         {!user ? (
@@ -94,6 +97,8 @@ function Navbar() {
                     </button>
                   </div>
                 </div>
+
+                <button onClick={() => navigate("/profile")} className="w-full mb-2 text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700">Account</button>
                 <button
                   onClick={handleLogout}
                   className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100 dark:hover:bg-gray-700"
