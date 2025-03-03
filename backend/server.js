@@ -5,11 +5,15 @@ const cors = require('cors');
 const helmet = require('helmet');
 const connectDB = require('./config/db');
 const errorHandler = require('./middleware/errorHandler');
+const contentScheduler = require('./services/contentScheduler');
 
 const app = express();
 
 // Connect to database
 connectDB();
+
+// Start content scheduler
+contentScheduler.start();
 
 // Middleware
 app.use(cors({
@@ -23,6 +27,7 @@ app.use(express.json());
 // Routes
 app.use('/api/campaigns', require('./routes/campaignRoutes'));
 app.use('/api/contents', require('./routes/contentRoutes'));
+app.use('/api', require('./routes/aiRoutes'));
 
 // 404 handler
 app.use((req, res) => {
@@ -32,5 +37,18 @@ app.use((req, res) => {
 // Error handling
 app.use(errorHandler);
 
+// Handle graceful shutdown
+process.on('SIGTERM', () => {
+  console.log('SIGTERM received. Shutting down gracefully...');
+  contentScheduler.stop();
+  process.exit(0);
+});
+
+process.on('SIGINT', () => {
+  console.log('SIGINT received. Shutting down gracefully...');
+  contentScheduler.stop();
+  process.exit(0);
+});
+
 const PORT = process.env.PORT || 6000;
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`)); 
+app.listen(PORT, () => console.log(`Server running on port ${PORT}`));

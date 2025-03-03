@@ -250,6 +250,10 @@ function Schedule() {
                       <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200">
                         {campaign.name}
                       </h3>
+                      {/* campgin apikey */}
+                      {/* <p className="text-sm text-gray-500 dark:text-gray-400">
+                        {campaign.apiKey}
+                      </p> */}
                       <p className="text-sm text-gray-500 dark:text-gray-400">
                         {/* {FREQUENCY_OPTIONS[campaign?.frequency?.toUpperCase()].label} •{' '} */}
                         {new Date(campaign.startDate).toLocaleDateString()}

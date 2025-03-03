@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '@nfid/identitykit/react';
 import { toast } from 'react-hot-toast';
 import { useDatabase } from '../../hooks/useDatabase';
+import AIContentModal from '../../components/AIContentModal';
 
 function CampaignDetails({ campaign, onBack }) {
   const { user } = useAuth();
@@ -20,6 +21,7 @@ function CampaignDetails({ campaign, onBack }) {
   // Form states
   const [content, setContent] = useState('');
   const [scheduledTime, setScheduledTime] = useState('');
+  const [isAIModalOpen, setIsAIModalOpen] = useState(false);
 
   // Load contents from API
   useEffect(() => {
@@ -139,13 +141,24 @@ function CampaignDetails({ campaign, onBack }) {
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                   Content
                 </label>
-                <textarea
-                  value={content}
-                  onChange={(e) => setContent(e.target.value)}
-                  rows={4}
-                  className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                  placeholder="Enter your content here..."
-                />
+                <div className="flex space-x-2">
+                  <textarea
+                    value={content}
+                    onChange={(e) => setContent(e.target.value)}
+                    className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                    rows={4}
+                    placeholder="Enter your content here"
+                  />
+                  <button
+                    onClick={() => setIsAIModalOpen(true)}
+                    className="px-3 py-2 bg-purple-500 text-black rounded-md hover:bg-purple-600"
+                    title="Generate with AI"
+                  >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                    </svg>
+                  </button>
+                </div>
               </div>
 
               <div>
@@ -177,6 +190,15 @@ function CampaignDetails({ campaign, onBack }) {
             </div>
           </div>
         ) : null}
+
+        <AIContentModal
+          isOpen={isAIModalOpen}
+          onClose={() => setIsAIModalOpen(false)}
+          onAccept={(generatedContent) => {
+            setContent(generatedContent);
+            setIsAIModalOpen(false);
+          }}
+        />
 
         <div className="space-y-4">
           {contents

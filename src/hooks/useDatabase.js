@@ -34,6 +34,11 @@ export function useDatabase() {
     }
   };
 
+  // AI Content Generation
+  const generateAIContent = useCallback(async (prompt) => {
+    return await apiCall('POST', '/generate-content', { prompt });
+  }, []);
+
   // Campaign Operations
   const createCampaign = useCallback(async (campaignData) => {
     return await apiCall('POST', '/campaigns', campaignData);
@@ -90,5 +95,7 @@ export function useDatabase() {
     getContents,
     updateContent,
     deleteContent,
+    // AI operations
+    generateAIContent,
   };
 } 

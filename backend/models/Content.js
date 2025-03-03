@@ -20,6 +20,16 @@ const contentSchema = new mongoose.Schema({
     type: String,
     enum: ['pending', 'posted', 'failed'],
     default: 'pending'
+  },
+  lastError: {
+    type: String
+  },
+  attempts: {
+    type: Number,
+    default: 0
+  },
+  lastAttempt: {
+    type: Date
   }
 }, {
   timestamps: true
