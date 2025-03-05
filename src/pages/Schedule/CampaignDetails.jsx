@@ -3,6 +3,7 @@ import { useAuth } from '@nfid/identitykit/react';
 import { toast } from 'react-hot-toast';
 import { useDatabase } from '../../hooks/useDatabase';
 import AIContentModal from '../../components/AIContentModal';
+import BulkAIContentModal from '../../components/BulkAIContentModal';
 
 function CampaignDetails({ campaign, onBack }) {
   const { user } = useAuth();
@@ -22,6 +23,7 @@ function CampaignDetails({ campaign, onBack }) {
   const [content, setContent] = useState('');
   const [scheduledTime, setScheduledTime] = useState('');
   const [isAIModalOpen, setIsAIModalOpen] = useState(false);
+  const [isBulkAIModalOpen, setIsBulkAIModalOpen] = useState(false);
 
   // Load contents from API
   useEffect(() => {
@@ -105,6 +107,18 @@ function CampaignDetails({ campaign, onBack }) {
     }
   };
 
+  const handleBulkContentSave = async (contents) => {
+    try {
+      for (const content of contents) {
+        await createContent(content);
+      }
+      await loadContents();
+      toast.success(`Successfully scheduled ${contents.length} posts`);
+    } catch (err) {
+      toast.error('Failed to schedule some posts');
+    }
+  };
+
   return (
     <div className="p-6">
       <div className="max-w-4xl mx-auto">
@@ -122,12 +136,18 @@ function CampaignDetails({ campaign, onBack }) {
           </h1>
         </div>
 
-        <div className="mb-6">
+        <div className="mb-6 flex space-x-4">
           <button
             onClick={() => setIsAddingContent(true)}
             className="px-6 py-3 bg-blue-500 text-black rounded-lg hover:bg-blue-600 transition-colors"
           >
             Add New Content
+          </button>
+          <button
+            onClick={() => setIsBulkAIModalOpen(true)}
+            className="px-6 py-3 bg-purple-500 text-black rounded-lg hover:bg-purple-600 transition-colors"
+          >
+            Bulk Generate Content
           </button>
         </div>
 
@@ -198,6 +218,13 @@ function CampaignDetails({ campaign, onBack }) {
             setContent(generatedContent);
             setIsAIModalOpen(false);
           }}
+        />
+
+        <BulkAIContentModal
+          isOpen={isBulkAIModalOpen}
+          onClose={() => setIsBulkAIModalOpen(false)}
+          onSave={handleBulkContentSave}
+          campaignId={campaign._id}
         />
 
         <div className="space-y-4">

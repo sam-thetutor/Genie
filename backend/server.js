@@ -6,6 +6,8 @@ const helmet = require('helmet');
 const connectDB = require('./config/db');
 const errorHandler = require('./middleware/errorHandler');
 const contentScheduler = require('./services/contentScheduler');
+const telegramBot = require('./services/telegramBot');
+const discordBot = require('./services/discordBot');
 
 const app = express();
 
@@ -28,6 +30,7 @@ app.use(express.json());
 app.use('/api/campaigns', require('./routes/campaignRoutes'));
 app.use('/api/contents', require('./routes/contentRoutes'));
 app.use('/api', require('./routes/aiRoutes'));
+app.use('/api/routes', require('./routes/routeRoutes'));
 
 // 404 handler
 app.use((req, res) => {
@@ -41,6 +44,8 @@ app.use(errorHandler);
 process.on('SIGTERM', () => {
   console.log('SIGTERM received. Shutting down gracefully...');
   contentScheduler.stop();
+  telegramBot.stop();
+  discordBot.stop();
   process.exit(0);
 });
 
@@ -50,5 +55,7 @@ process.on('SIGINT', () => {
   process.exit(0);
 });
 
+telegramBot.start();
+discordBot.start();
 const PORT = process.env.PORT || 6000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));

@@ -4,24 +4,6 @@ import { toast } from 'react-hot-toast';
 import CampaignDetails from './CampaignDetails';
 import { useDatabase } from '../../hooks/useDatabase';
 
-const FREQUENCY_OPTIONS = {
-  DAILY: {
-    label: 'Daily',
-    value: 'daily',
-    description: 'Post content every day at specified time'
-  },
-  WEEKLY: {
-    label: 'Weekly',
-    value: 'weekly',
-    description: 'Post content on selected days of the week'
-  },
-  CUSTOM: {
-    label: 'Custom',
-    value: 'custom',
-    description: 'Set custom schedule for each content'
-  }
-};
-
 function Schedule() {
   const { user } = useAuth();
   const { 
@@ -46,16 +28,19 @@ function Schedule() {
 
   // Load campaigns from database
   useEffect(() => {
-    if (user) {
+    if (user?.principal?.toString()) {
       loadCampaigns();
     }
-  }, [user]);
+  }, [user?.principal]);
 
   const loadCampaigns = async () => {
     try {
+      console.log('Loading campaigns for user:', user?.principal?.toString());
       const data = await getCampaigns();
+      console.log('Loaded campaigns:', data);
       setCampaigns(data);
     } catch (err) {
+      console.error('Error loading campaigns:', err);
       toast.error('Failed to load campaigns');
     }
   };
@@ -73,6 +58,7 @@ function Schedule() {
         startDate: new Date(startDate).toISOString(),
         endDate: endDate ? new Date(endDate).toISOString() : null,
         status: 'active',
+        principal: user?.principal?.toString()
       };
 
       await createCampaign(newCampaign);

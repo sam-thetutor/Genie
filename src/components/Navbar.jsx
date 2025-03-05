@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '@nfid/identitykit/react';
 import { useState, useRef, useEffect } from 'react';
 import {toast} from "react-hot-toast"
@@ -37,6 +37,12 @@ function Navbar() {
     navigate("/")
   }
 
+  const navigation = [
+    { name: 'Schedule', href: '/schedule' },
+    { name: 'Routes', href: '/routes' },
+    // ... other navigation items
+  ];
+
   return (
     <nav className="bg-white dark:bg-gray-800 shadow-md p-4">
       <div className="flex justify-between items-center">
@@ -47,6 +53,7 @@ function Navbar() {
           {/* <Link to="/my-instances" className="text-gray-700 dark:text-gray-200 hover:text-blue-500">My Instances</Link> */}
           <Link to="/integrations" className="text-gray-700 dark:text-gray-200 hover:text-blue-500">Integrations</Link>
           <Link to="/schedule" className="text-gray-700 dark:text-gray-200 hover:text-blue-500">Schedule</Link>
+          <Link to="/routes" className="text-gray-700 dark:text-gray-200 hover:text-blue-500">MediaLink</Link>
         </div>
 
         {!user ? (

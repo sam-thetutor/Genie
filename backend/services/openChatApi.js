@@ -1,28 +1,29 @@
-const axios = require('axios');
+const { BotClientFactory } = require('@open-ic/openchat-botclient-ts');
 
-class OpenChatApi {
+class OpenChatService {
   constructor() {
-    this.baseUrl = 'https://api.openchat.com/v1'; // Replace with actual API URL
+    this.factory = new BotClientFactory({
+      openchatPublicKey: process.env.OC_PUBLIC,
+      icHost: process.env.IC_HOST,
+      openStorageCanisterId: process.env.STORAGE_INDEX_CANISTER,
+      identityPrivateKey: process.env.IDENTITY_PRIVATE,
+    });
   }
 
-  async postMessage(apiKey, message) {
+  async sendMessage(apiKey, groupId, content) {
     try {
-      const response = await axios.post(
-        `${this.baseUrl}/messages`,
-        { content: message },
-        {
-          headers: {
-            'Authorization': `Bearer ${apiKey}`,
-            'Content-Type': 'application/json'
-          }
-        }
-      );
-      return response.data;
+      const client = this.factory.createClientFromApiKey(apiKey);
+      // await client.connect();
+      // await client.setCurrentGroup(groupId);
+
+      const message = await client.createTextMessage(content);
+      let response = await client.sendMessage(message);
+      console.log('Message sent response :',response);
     } catch (error) {
-      console.error('OpenChat API Error:', error.response?.data || error.message);
-      throw error;
+      console.error('OpenChat API error:', error);
+      throw new Error(`OpenChat API error: ${error.message}`);
     }
   }
 }
 
-module.exports = new OpenChatApi(); 
+module.exports = new OpenChatService(); 

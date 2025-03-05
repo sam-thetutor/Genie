@@ -1,9 +1,12 @@
 import { useState, useCallback } from 'react';
 import axios from 'axios';
+import { useAuth } from '@nfid/identitykit/react';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
 
 export function useDatabase() {
+  const { user } = useAuth();
+  
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
 
@@ -18,7 +21,7 @@ export function useDatabase() {
         url: `${API_BASE_URL}${endpoint}`,
         data: data === null ? undefined : data,
         headers: {
-          'Content-Type': 'application/json',
+          'Content-Type': 'application/json'
         }
       });
       return response.data || { message: 'Operation successful' };
@@ -45,16 +48,19 @@ export function useDatabase() {
   }, []);
 
   const getCampaigns = useCallback(async () => {
-    return await apiCall('GET', '/campaigns');
-  }, []);
+    const principal = user?.principal?.toString();
+    console.log('Fetching campaigns for principal:', principal);
+    return await apiCall('GET', `/campaigns?principal=${principal}`);
+  }, [user?.principal]);
 
   const updateCampaign = useCallback(async (campaignId, updateData) => {
     return await apiCall('PUT', `/campaigns/${campaignId}`, updateData);
   }, []);
 
   const deleteCampaign = useCallback(async (campaignId) => {
-    return await apiCall('DELETE', `/campaigns/${campaignId}`);
-  }, []);
+    const principal = user?.principal?.toString();
+    return await apiCall('DELETE', `/campaigns/${campaignId}`, { principal });
+  }, [user?.principal]);
 
   const getCampaign = useCallback(async (campaignId) => {
     return await apiCall('GET', `/campaigns/${campaignId}`);
@@ -73,6 +79,7 @@ export function useDatabase() {
     return await apiCall('PUT', `/contents/${contentId}`, updateData);
   }, []);
 
+  
   const deleteContent = useCallback(async (contentId) => {
     if (!contentId) {
       throw new Error('Content ID is required');
@@ -80,6 +87,29 @@ export function useDatabase() {
     console.log('Deleting content with ID:', contentId);
     return await apiCall('DELETE', `/contents/${contentId}`);
   }, []);
+
+  // Route Operations
+  const createRoute = useCallback(async (routeData) => {
+    return await apiCall('POST', '/routes', routeData);
+  }, []);
+
+  const getRoutes = useCallback(async () => {
+    const principal = user?.principal?.toString();
+    return await apiCall('GET', `/routes?principal=${principal}`);
+  }, [user?.principal]);
+
+  const updateRoute = useCallback(async (routeId, updateData) => {
+    return await apiCall('PUT', `/routes/${routeId}`, {
+      ...updateData,
+      principal: user?.principal?.toString()
+    });
+  }, [user?.principal]);
+
+  const deleteRoute = useCallback(async (routeId) => {
+    return await apiCall('DELETE', `/routes/${routeId}`, {
+      principal: user?.principal?.toString()
+    });
+  }, [user?.principal]);
 
   return {
     isLoading,
@@ -97,5 +127,10 @@ export function useDatabase() {
     deleteContent,
     // AI operations
     generateAIContent,
+    // Route operations
+    createRoute,
+    getRoutes,
+    updateRoute,
+    deleteRoute,
   };
 } 
