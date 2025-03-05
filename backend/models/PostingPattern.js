@@ -9,7 +9,7 @@ const postingPatternSchema = new mongoose.Schema({
   platform: {
     type: String,
     required: true,
-    enum: ['telegram', 'discord']
+    enum: ['telegram', 'discord', 'scheduled']
   },
   channelId: {
     type: String,

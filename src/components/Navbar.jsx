@@ -54,6 +54,7 @@ function Navbar() {
           <Link to="/integrations" className="text-gray-700 dark:text-gray-200 hover:text-blue-500">Integrations</Link>
           <Link to="/schedule" className="text-gray-700 dark:text-gray-200 hover:text-blue-500">Schedule</Link>
           <Link to="/routes" className="text-gray-700 dark:text-gray-200 hover:text-blue-500">MediaLink</Link>
+          <Link to="/analytics" className="text-gray-700 dark:text-gray-200 hover:text-blue-500">Analytics</Link>
         </div>
 
         {!user ? (

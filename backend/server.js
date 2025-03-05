@@ -31,6 +31,7 @@ app.use('/api/campaigns', require('./routes/campaignRoutes'));
 app.use('/api/contents', require('./routes/contentRoutes'));
 app.use('/api', require('./routes/aiRoutes'));
 app.use('/api/routes', require('./routes/routeRoutes'));
+app.use('/api/analytics', require('./routes/analyticsRoutes'));
 
 // 404 handler
 app.use((req, res) => {
@@ -55,7 +56,7 @@ process.on('SIGINT', () => {
   process.exit(0);
 });
 
-telegramBot.start();
+// telegramBot.start();
 discordBot.start();
 const PORT = process.env.PORT || 6000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));

@@ -8,6 +8,7 @@ import MyInstances from './pages/MyInstances'
 import Integrations from './pages/Integrations'
 import Schedule from './pages/Schedule/Schedule'
 import MediaLink from './pages/Routes/Routes'
+import DashboardAnalytics from './pages/Analytics/Dashboard'
 
 function App() {
   return (
@@ -23,6 +24,7 @@ function App() {
           <Route path="/my-instances" element={<MyInstances />} />
           <Route path="/integrations" element={<Integrations />} />
           <Route path="/routes" element={<MediaLink />} />
+          <Route path="/analytics" element={<DashboardAnalytics />} />
         </Routes>
       </main>
     </div>

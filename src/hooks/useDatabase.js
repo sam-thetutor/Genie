@@ -1,6 +1,7 @@
 import { useState, useCallback } from 'react';
 import axios from 'axios';
 import { useAuth } from '@nfid/identitykit/react';
+import { toast } from 'react-hot-toast';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
 
@@ -9,6 +10,12 @@ export function useDatabase() {
   
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [analyticsData, setAnalyticsData] = useState({
+    metrics: null,
+    recommendations: [],
+    loading: false,
+    error: null
+  });
 
   // Helper function for API calls
   const apiCall = async (method, endpoint, data = null) => {
@@ -111,6 +118,45 @@ export function useDatabase() {
     });
   }, [user?.principal]);
 
+  const fetchAnalytics = async (userId) => {
+    try {
+      setAnalyticsData(prev => ({ ...prev, loading: true, error: null }));
+
+      if (!userId) {
+        throw new Error('Please connect your wallet first');
+      }
+
+      const [metrics, recommendations] = await Promise.all([
+        apiCall('GET', `/analytics/patterns/${userId}`),
+        apiCall('GET', `/analytics/recommendations/${userId}`)
+      ]);
+
+      setAnalyticsData({
+        metrics,
+        recommendations: recommendations.recommendations,
+        loading: false,
+        error: null
+      });
+    } catch (error) {
+      console.error('Error fetching analytics:', error);
+      setAnalyticsData(prev => ({
+        ...prev,
+        loading: false,
+        error: error.message || 'Failed to fetch analytics data'
+      }));
+    }
+  };
+
+  const fetchDashboardMetrics = async (userId) => {
+    try {
+      const response = await axios.get(`${API_BASE_URL}/analytics/dashboard/${userId}`);
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching dashboard metrics:', error);
+      throw new Error('Failed to fetch dashboard metrics');
+    }
+  };
+
   return {
     isLoading,
     error,
@@ -132,5 +178,8 @@ export function useDatabase() {
     getRoutes,
     updateRoute,
     deleteRoute,
+    fetchDashboardMetrics,
+    analyticsData,
+    fetchAnalytics
   };
 } 

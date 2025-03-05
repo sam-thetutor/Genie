@@ -1,5 +1,6 @@
 const OpenAI = require('openai');
 const PostingPattern = require('../models/PostingPattern');
+const contentAnalyzer = require('../services/contentAnalyzer');
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY
@@ -19,6 +20,8 @@ exports.generateContent = async (req, res) => {
       platform,
       channelId
     });
+
+    console.log("user posting and pattern found", pattern);
 
     // Build system message using learned patterns
     let systemMessage = "You are a content creator assistant.";
@@ -45,4 +48,55 @@ exports.generateContent = async (req, res) => {
     console.error('OpenAI API Error:', error);
     res.status(500).json({ message: 'Failed to generate content' });
   }
+};
+
+exports.analyzeContent = async (req, res) => {
+  try {
+    const { content, userId } = req.body;
+
+    if (!content) {
+      return res.status(400).json({ message: 'Content is required' });
+    }
+
+    if (!userId) {
+      return res.status(400).json({ message: 'User ID is required' });
+    }
+
+    // Analyze the content using contentAnalyzer service
+    const pattern = await contentAnalyzer.analyzeScheduledContent(content, userId);
+
+    // If no pattern was created/updated
+    if (!pattern) {
+      return res.status(500).json({ message: 'Failed to analyze content' });
+    }
+
+    // Return the updated pattern metrics
+    const metrics = {
+      sentiment: {
+        positive: pattern.patterns.sentiment.positive,
+        neutral: pattern.patterns.sentiment.neutral,
+        negative: pattern.patterns.sentiment.negative
+      },
+      toneDistribution: pattern.patterns.toneAttributes,
+      topCategories: pattern.patterns.contentCategories,
+      popularPhrases: pattern.patterns.keyPhrases.slice(0, 5),
+      ctaEffectiveness: {
+        hasCtA: pattern.patterns.callToAction.hasCtA,
+        types: pattern.patterns.callToAction.types
+      }
+    };
+
+    res.json({ 
+      message: 'Content analyzed successfully',
+      metrics 
+    });
+  } catch (error) {
+    console.error('Content analysis error:', error);
+    res.status(500).json({ 
+      message: 'Error analyzing content',
+      error: error.message 
+    });
+  }
 }; 
+
+
