@@ -331,7 +331,17 @@ exports.getDashboardMetrics = async (req, res) => {
       timeMetrics,
       engagementMetrics,
       campaignPerformance: { topCampaigns },
-      systemHealth
+      systemHealth,
+      twitter: {
+        monitored: routes.filter(r => r.platform === 'twitter').length,
+        activeMonitoring: routes.filter(r => r.platform === 'twitter' && r.status === 'active').length,
+        totalTweets: contents.filter(c => c.platform === 'twitter').length,
+        lastCheck: routes
+          .filter(r => r.platform === 'twitter')
+          .reduce((latest, route) => 
+            !latest || (route.lastCheck && route.lastCheck > latest) ? route.lastCheck : latest
+          , null)
+      }
     };
 
     res.json(metrics);

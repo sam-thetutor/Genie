@@ -3,17 +3,51 @@ const { validationResult } = require('express-validator');
 
 exports.createRoute = async (req, res) => {
   try {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() });
+    const {
+      principal,
+      name,
+      platform,
+      sourceId,
+      openchatApiKey,
+      twitterUsername,
+      includeRetweets,
+      includeReplies,
+      filters
+    } = req.body;
+
+    // Validate platform-specific requirements
+    if (platform === 'twitter') {
+      if (!twitterUsername) {
+        return res.status(400).json({ message: 'Twitter username is required' });
+      }
     }
 
-    const route = new Route(req.body);
+    const route = new Route({
+      principal,
+      name,
+      platform,
+      sourceId,
+      openchatApiKey,
+      // Add Twitter-specific fields if platform is Twitter
+      ...(platform === 'twitter' && {
+        twitterUsername,
+        includeRetweets: includeRetweets || false,
+        includeReplies: includeReplies || false,
+        monitoringInterval: 1
+      }),
+      filters: filters || {
+        includeText: true,
+        includeImages: true,
+        includeLinks: true,
+        keywords: []
+      }
+    });
+
     await route.save();
     res.status(201).json(route);
   } catch (error) {
     console.error('Error creating route:', error);
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ message: 'Error creating route', error: error.message });
   }
 };
 
@@ -35,21 +69,53 @@ exports.getRoutes = async (req, res) => {
 
 exports.updateRoute = async (req, res) => {
   try {
-    const route = await Route.findById(req.params.id);
+    const {
+      principal,
+      name,
+      platform,
+      sourceId,
+      openchatApiKey,
+      twitterUsername,
+      includeRetweets,
+      includeReplies,
+      filters
+    } = req.body;
+
+    // Validate Twitter-specific fields
+    if (platform === 'twitter') {
+      if (!twitterUsername) {
+        return res.status(400).json({ message: 'Twitter username is required' });
+      }
+    }
+
+    const route = await Route.findByIdAndUpdate(
+      req.params.id,
+      {
+        principal,
+        name,
+        platform,
+        sourceId,
+        openchatApiKey,
+        // Add Twitter-specific fields if platform is Twitter
+        ...(platform === 'twitter' && {
+          twitterUsername,
+          includeRetweets,
+          includeReplies,
+          monitoringInterval: 1 // Fixed 1-minute interval
+        }),
+        filters
+      },
+      { new: true }
+    );
+
     if (!route) {
       return res.status(404).json({ message: 'Route not found' });
     }
 
-    // Check ownership
-    if (route.principal !== req.body.principal) {
-      return res.status(403).json({ message: 'Not authorized to update this route' });
-    }
-
-    Object.assign(route, req.body);
-    await route.save();
     res.json(route);
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    console.error('Error updating route:', error);
+    res.status(500).json({ message: 'Error updating route' });
   }
 };
 

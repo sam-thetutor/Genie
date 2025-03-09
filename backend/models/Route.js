@@ -12,8 +12,8 @@ const routeSchema = new mongoose.Schema({
   },
   platform: {
     type: String,
-    enum: ['telegram', 'discord', 'twitter'],
-    required: true
+    required: true,
+    enum: ['discord', 'telegram', 'twitter']
   },
   sourceId: {
     type: String,
@@ -39,7 +39,22 @@ const routeSchema = new mongoose.Schema({
     type: Number,
     default: 0
   },
-  lastError: String
+  lastError: String,
+  twitterUsername: String,
+  lastTweetId: String,
+  monitoringInterval: {
+    type: Number,
+    default: 5
+  },
+  includeRetweets: {
+    type: Boolean,
+    default: false
+  },
+  includeReplies: {
+    type: Boolean,
+    default: false
+  },
+  lastCheck: Date
 }, {
   timestamps: true
 });

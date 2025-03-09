@@ -8,6 +8,7 @@ const errorHandler = require('./middleware/errorHandler');
 const contentScheduler = require('./services/contentScheduler');
 const telegramBot = require('./services/telegramBot');
 const discordBot = require('./services/discordBot');
+const twitterBot = require('./services/twitterBot');
 
 const app = express();
 
@@ -33,6 +34,7 @@ app.use('/api', require('./routes/aiRoutes'));
 app.use('/api/routes', require('./routes/routeRoutes'));
 app.use('/api/analytics', require('./routes/analyticsRoutes'));
 
+
 // 404 handler
 app.use((req, res) => {
   res.status(404).json({ message: 'Route not found' });
@@ -47,6 +49,7 @@ process.on('SIGTERM', () => {
   contentScheduler.stop();
   telegramBot.stop();
   discordBot.stop();
+  twitterBot.stop();
   process.exit(0);
 });
 
@@ -58,5 +61,6 @@ process.on('SIGINT', () => {
 
 // telegramBot.start();
 discordBot.start();
+// twitterBot.start();
 const PORT = process.env.PORT || 6000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));

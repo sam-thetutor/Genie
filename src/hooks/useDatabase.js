@@ -97,8 +97,27 @@ export function useDatabase() {
 
   // Route Operations
   const createRoute = useCallback(async (routeData) => {
-    return await apiCall('POST', '/routes', routeData);
-  }, []);
+    try {
+      // Validate Twitter-specific requirements
+      if (routeData.platform === 'twitter') {
+        if (!routeData.twitterUsername) {
+          throw new Error('Twitter username is required');
+        }
+      }
+
+      const formattedData = {
+        ...routeData,
+        principal: user?.principal?.toString(),
+        // Ensure sourceId is set correctly
+        sourceId: routeData.platform === 'twitter' ? routeData.twitterUsername : routeData.sourceId
+      };
+
+      return await apiCall('POST', '/routes', formattedData);
+    } catch (error) {
+      console.error('Error creating route:', error);
+      throw error;
+    }
+  }, [user?.principal]);
 
   const getRoutes = useCallback(async () => {
     const principal = user?.principal?.toString();
@@ -106,9 +125,14 @@ export function useDatabase() {
   }, [user?.principal]);
 
   const updateRoute = useCallback(async (routeId, updateData) => {
-    return await apiCall('PUT', `/routes/${routeId}`, {
+    // Format the data based on platform
+    const formattedData = {
       ...updateData,
-      principal: user?.principal?.toString()
+      principal: user?.principal?.toString(),
+    };
+
+    return await apiCall('PUT', `/routes/${routeId}`, {
+      ...formattedData
     });
   }, [user?.principal]);
 

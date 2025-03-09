@@ -1,11 +1,16 @@
 import React, { useState } from 'react';
+import TwitterRouteForm from '../../components/TwitterRouteForm';
+import { toast } from 'react-hot-toast';
 
 function RouteForm({ onSubmit, onCancel, initialData }) {
   const [formData, setFormData] = useState({
     name: '',
-    platform: 'telegram',
+    platform: 'twitter',
     sourceId: '',
     openchatApiKey: '',
+    twitterUsername: '',
+    includeRetweets: false,
+    includeReplies: false,
     filters: {
       includeText: true,
       includeImages: true,
@@ -17,7 +22,111 @@ function RouteForm({ onSubmit, onCancel, initialData }) {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    onSubmit(formData);
+    console.log('Submitting form data:', formData);
+
+    // Validate required fields
+    if (!formData.name) {
+      toast.error('Route name is required');
+      return;
+    }
+    
+    if (!formData.openchatApiKey) {
+      toast.error('OpenChat API key is required');
+      return;
+    }
+
+    if (formData.platform === 'twitter') {
+      if (!formData.twitterUsername || formData.twitterUsername.trim() === '') {
+        console.log('Twitter validation failed:', formData);
+        toast.error('Twitter username is required');
+        return;
+      }
+    }
+
+    const submitData = {
+      ...formData,
+      ...(formData.platform === 'twitter' && {
+        twitterUsername: formData.twitterUsername.trim(),
+        sourceId: formData.twitterUsername.trim()
+      }),
+    };
+
+    console.log('Final submit data:', submitData);
+    onSubmit(submitData);
+  };
+
+  const renderPlatformSpecificFields = () => {
+    switch(formData.platform) {
+      case 'twitter':
+        return (
+          <TwitterRouteForm
+            initialData={formData}
+            onSubmit={(twitterData) => {
+              setFormData(prev => ({
+                ...prev,
+                twitterUsername: twitterData.twitterUsername,
+                includeRetweets: twitterData.includeRetweets,
+                includeReplies: twitterData.includeReplies,
+                sourceId: twitterData.twitterUsername,
+                platform: 'twitter'
+              }));
+            }}
+          />
+        );
+      case 'telegram':
+        return (
+          <>
+            <div className="mb-2 text-sm text-gray-500">
+              <ol className="list-decimal ml-4 mt-1">
+                <li>Add the bot (@your_bot_name) to your Telegram group</li>
+                <li>Make the bot an admin of the group</li>
+                <li>The bot will send a welcome message with the group ID</li>
+                <li>Copy that ID and paste it here</li>
+              </ol>
+            </div>
+            <input
+              type="text"
+              value={formData.sourceId}
+              onChange={(e) => setFormData({ ...formData, sourceId: e.target.value })}
+              className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-700"
+              placeholder="Enter the group ID (e.g., -1001234567890)"
+              required
+            />
+          </>
+        );
+      case 'discord':
+        return (
+          <>
+            <div className="mb-2 text-sm text-gray-500">
+              <ol className="list-decimal ml-4 mt-1">
+                <li>Enable Developer Mode in Discord Settings - App Settings - Advanced</li>
+                <li>
+                  <a 
+                    href={import.meta.env.VITE_DISCORD_BOT_INVITE_LINK}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-blue-500 hover:text-blue-600"
+                  >
+                    Click here to add the bot to your Discord server
+                  </a>
+                </li>
+                <li>Right-click the channel you want to monitor</li>
+                <li>Click "Copy Channel ID" and paste it here</li>
+              </ol>
+            </div>
+            <input
+              type="text"
+              value={formData.sourceId}
+              onChange={(e) => setFormData({ ...formData, sourceId: e.target.value })}
+              className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-700"
+              placeholder="Enter the channel ID"
+              required
+            />
+          </>
+        );
+      default:
+        return null;
+    }
   };
 
   return (
@@ -35,82 +144,42 @@ function RouteForm({ onSubmit, onCancel, initialData }) {
             type="text"
             value={formData.name}
             onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-            className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-            placeholder="My Telegram Route"
+            className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-700"
+            placeholder="My Route"
             required
           />
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
             Platform
           </label>
           <select
             value={formData.platform}
-            onChange={(e) => setFormData({ ...formData, platform: e.target.value })}
-            className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+            onChange={(e) => setFormData(prev => ({ ...prev, platform: e.target.value }))}
+            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-700"
           >
             <option value="telegram">Telegram</option>
             <option value="discord">Discord</option>
-            <option value="twitter" disabled>Twitter (Coming Soon)</option>
+            <option value="twitter">Twitter</option>
           </select>
         </div>
 
-        <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-            Source Channel ID
-          </label>
-          <div className="mb-2 text-sm text-gray-500">
-            {formData.platform === 'telegram' ? (
-              <>
-                <ol className="list-decimal ml-4 mt-1">
-                  <li>Add the bot (@your_bot_name) to your Telegram group</li>
-                  <li>Make the bot an admin of the group</li>
-                  <li>The bot will send a welcome message with the group ID</li>
-                  <li>Copy that ID and paste it here</li>
-                </ol>
-              </>
-            ) : (
-              <>
-                <ol className="list-decimal ml-4 mt-1">
-                  <li>Enable Developer Mode in Discord Settings > App Settings > Advanced</li>
-                  <li>
-                    <a 
-                      href={import.meta.env.VITE_DISCORD_BOT_INVITE_LINK}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-blue-500 hover:text-blue-600"
-                    >
-                      Click here to add the bot to your Discord server
-                    </a>
-                  </li>
-                  <li>Right-click the channel you want to monitor</li>
-                  <li>Click "Copy Channel ID" and paste it here</li>
-                </ol>
-                <div className="mt-4 p-4 bg-blue-50 dark:bg-blue-900 rounded-md">
-                  <h4 className="font-medium text-blue-800 dark:text-blue-200">Required Bot Permissions:</h4>
-                  <ul className="mt-2 list-disc list-inside text-blue-700 dark:text-blue-300">
-                    <li>View Channels</li>
-                    <li>Read Message History</li>
-                    <li>Read Messages/View Channels</li>
-                  </ul>
-                </div>
-              </>
-            )}
-            <p className="mt-2 text-yellow-600 dark:text-yellow-400">
-              Note: The bot must be an admin to monitor messages.
-            </p>
+        {formData.platform !== 'twitter' && (
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              Source Channel ID
+            </label>
+            {renderPlatformSpecificFields()}
           </div>
-          <input
-            type="text"
-            value={formData.sourceId}
-            onChange={(e) => setFormData({ ...formData, sourceId: e.target.value })}
-            className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-            placeholder="Enter the group ID (e.g., -1001234567890)"
-            required
-          />
-        </div>
+        )}
 
+        {/* Twitter-specific form */}
+        {formData.platform === 'twitter' && (
+          renderPlatformSpecificFields()
+        )}
+
+        {/* OpenChat API Key input for all platforms */}
         <div>
           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
             OpenChat API Key
@@ -119,7 +188,7 @@ function RouteForm({ onSubmit, onCancel, initialData }) {
             type="password"
             value={formData.openchatApiKey}
             onChange={(e) => setFormData({ ...formData, openchatApiKey: e.target.value })}
-            className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+            className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-700"
             placeholder="Enter OpenChat API key"
             required
           />

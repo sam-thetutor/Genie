@@ -11,6 +11,7 @@
     "nodemon": "^3.1.9"
   },
   "dependencies": {
+    "agent-twitter-client": "^0.0.18",
     "cors": "^2.8.5",
     "discord.js": "^14.18.0",
     "dotenv": "^16.4.7",
@@ -21,6 +22,7 @@
     "natural": "^8.0.1",
     "node-telegram-bot-api": "^0.66.0",
     "openai": "^4.86.1",
-    "recharts": "^2.15.1"
+    "recharts": "^2.15.1",
+    "twitter-api-v2": "^1.15.0"
   }
 }

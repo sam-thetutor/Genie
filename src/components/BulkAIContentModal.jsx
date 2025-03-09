@@ -13,7 +13,7 @@ function BulkAIContentModal({ isOpen, onClose, onSave, campaignId }) {
 
   const generateContents = async () => {
     try {
-      const enhancedPrompt = `Generate ${count} different ${frequency} social media posts about: ${prompt}. Make each post unique and engaging.`;
+      const enhancedPrompt = `Generate ${count} different ${frequency} social media posts about: ${prompt}. Make each post unique and engaging. dont put any hashtags. each post should atleast be one sentence long`;
       const response = await generateAIContent(enhancedPrompt);
       
       // Split the response into individual posts and format them
@@ -65,6 +65,13 @@ function BulkAIContentModal({ isOpen, onClose, onSave, campaignId }) {
       return;
     }
     onSave(scheduledContents);
+    // Reset all state values
+    setPrompt('');
+    setCount(10);
+    setFrequency('daily');
+    setStartTime('');
+    setGeneratedContents([]);
+    setSelectedContents(new Set());
     onClose();
   };
 
@@ -138,6 +145,19 @@ function BulkAIContentModal({ isOpen, onClose, onSave, campaignId }) {
 
           {!generatedContents.length && (
             <div className="flex justify-end">
+               <button
+                  onClick={()=>{
+                    setGeneratedContents([]);
+                    setSelectedContents(new Set());
+                    onClose();
+                  }
+                    
+
+                  }
+                  className="px-4 py-2 text-gray-600 hover:text-gray-700 dark:text-gray-300"
+                >
+                  Cancel
+                </button>
               <button
                 onClick={generateContents}
                 disabled={!prompt || isLoading}

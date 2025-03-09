@@ -149,6 +149,12 @@ function CampaignDetails({ campaign, onBack }) {
           >
             Bulk Generate Content
           </button>
+          <button
+            onClick={() => setIsBulkAIModalOpen(true)}
+            className="px-6 py-3 bg-red-300  text-black rounded-lg"
+          >
+            Upload Content
+          </button>
         </div>
 
         {isAddingContent ? (
