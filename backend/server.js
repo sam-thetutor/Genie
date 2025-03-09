@@ -10,6 +10,7 @@ const telegramBot = require('./services/telegramBot');
 const discordBot = require('./services/discordBot');
 const twitterBot = require('./services/twitterBot');
 
+
 const app = express();
 
 // Connect to database
@@ -33,6 +34,7 @@ app.use('/api/contents', require('./routes/contentRoutes'));
 app.use('/api', require('./routes/aiRoutes'));
 app.use('/api/routes', require('./routes/routeRoutes'));
 app.use('/api/analytics', require('./routes/analyticsRoutes'));
+app.use('/api/ai-chat', require('./routes/aiChatRoutes'));
 
 
 // 404 handler
