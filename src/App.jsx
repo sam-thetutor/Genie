@@ -9,6 +9,7 @@ import Integrations from './pages/Integrations'
 import Schedule from './pages/Schedule/Schedule'
 import MediaLink from './pages/Routes/Routes'
 import DashboardAnalytics from './pages/Analytics/Dashboard'
+import AiChat from './pages/AICHAT/AiChat'
 
 function App() {
   return (
@@ -25,6 +26,7 @@ function App() {
           <Route path="/integrations" element={<Integrations />} />
           <Route path="/routes" element={<MediaLink />} />
           <Route path="/analytics" element={<DashboardAnalytics />} />
+          <Route path="/ai-chat" element={<AiChat />} />
         </Routes>
       </main>
     </div>

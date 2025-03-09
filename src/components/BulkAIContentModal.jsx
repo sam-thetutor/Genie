@@ -50,9 +50,10 @@ function BulkAIContentModal({ isOpen, onClose, onSave, campaignId }) {
 
     return Array.from(selectedContents).map((index) => {
       const scheduledTime = new Date(baseTime.getTime() + (index * interval));
+      const formattedTime = scheduledTime.toISOString().replace(/\.\d{3}Z$/, 'Z');
       return {
         content: generatedContents[index].content,
-        scheduledTime: scheduledTime.toISOString(),
+        scheduledTime: formattedTime,
         campaignId
       };
     });

@@ -71,9 +71,15 @@ function CampaignDetails({ campaign, onBack }) {
   };
 
   const handleEdit = (content) => {
+    // Format the date string to match the datetime-local input format
+    const formatDateForInput = (dateString) => {
+      const date = new Date(dateString);
+      return date.toISOString().slice(0, 16); // Get YYYY-MM-DDThh:mm format
+    };
+
     setEditingContent(content);
     setContent(content.content);
-    setScheduledTime(content.scheduledTime);
+    setScheduledTime(formatDateForInput(content.scheduledTime));
     setIsAddingContent(true);
   };
 
@@ -148,12 +154,6 @@ function CampaignDetails({ campaign, onBack }) {
             className="px-6 py-3 bg-purple-500 text-black rounded-lg hover:bg-purple-600 transition-colors"
           >
             Bulk Generate Content
-          </button>
-          <button
-            onClick={() => setIsBulkAIModalOpen(true)}
-            className="px-6 py-3 bg-red-300  text-black rounded-lg"
-          >
-            Upload Content
           </button>
         </div>
 

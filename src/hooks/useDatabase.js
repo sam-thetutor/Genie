@@ -181,6 +181,56 @@ export function useDatabase() {
     }
   };
 
+
+  const uploadAIFile = useCallback(async (instanceId, formData) => {
+    try {
+      const response = await axios.post(
+        `${API_BASE_URL}/ai-chat/${instanceId}/upload`,
+        formData,
+        {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        }
+      );
+      return response.data;
+    } catch (error) {
+      console.error('Error uploading file:', error);
+      throw error;
+    }
+  }, []);
+
+  const deleteAIFile = useCallback(async (fileId) => {
+    return await apiCall('DELETE', `/ai-chat/${fileId}`);
+  }, []);
+
+  const getAllInstances = useCallback(async () => {
+    return await apiCall('GET', '/ai-chat');
+  }, []);
+
+  const getInstance = useCallback(async (instanceId) => {
+    return await apiCall('GET', `/ai-chat/${instanceId}`);
+  }, []);
+
+  const deleteInstance = useCallback(async (instanceId) => {
+    console.log("deleting instance",instanceId);
+    return await apiCall('DELETE', `/ai-chat/${instanceId}`);
+  }, []);
+
+  const createInstance = useCallback(async (instanceName) => {
+    return await apiCall('POST', '/ai-chat', { name: instanceName });
+  }, []);
+
+
+  const getChatHistory = useCallback(async (instanceId) => {
+    return await apiCall('GET', `/ai-chat/${instanceId}/history`);
+  }, []);
+
+
+  const sendMessage = useCallback(async (instanceId, message) => {
+    return await apiCall('POST', `/ai-chat/${instanceId}/chat`, { message });
+  }, []);
+
   return {
     isLoading,
     error,
@@ -204,6 +254,14 @@ export function useDatabase() {
     deleteRoute,
     fetchDashboardMetrics,
     analyticsData,
-    fetchAnalytics
+    fetchAnalytics,
+    uploadAIFile,
+    deleteAIFile,
+    getAllInstances,
+    getInstance,
+    deleteInstance,
+    createInstance,
+    getChatHistory,
+    sendMessage
   };
 } 
