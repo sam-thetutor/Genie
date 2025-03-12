@@ -1,5 +1,6 @@
 const Campaign = require('../models/Campaign');
 const { validationResult } = require('express-validator');
+const Encryption = require('../utils/encryption');
 
 exports.createCampaign = async (req, res) => {
   try {
@@ -10,7 +11,25 @@ exports.createCampaign = async (req, res) => {
     }
 
     console.log('Creating campaign with data:', req.body);
-    const campaign = new Campaign(req.body);
+    const { name, platform, apiKeys = {}, schedule, ...otherDetails } = req.body;
+
+    // Encrypt API keys
+    const encryptedKeys = {};
+    if (apiKeys && typeof apiKeys === 'object') {
+      for (const [key, value] of Object.entries(apiKeys)) {
+        if (value) {
+          encryptedKeys[key] = await Encryption.encrypt(value);
+        }
+      }
+    }
+
+    const campaign = new Campaign({
+      name,
+      platform,
+      apiKeys: encryptedKeys,
+      schedule,
+      ...otherDetails
+    });
     await campaign.save();
     console.log('Campaign created:', campaign);
     res.status(201).json(campaign);
@@ -31,7 +50,29 @@ exports.getCampaigns = async (req, res) => {
     
     const campaigns = await Campaign.find({ principal });
     console.log('Found campaigns:', campaigns);
-    res.json(campaigns);
+
+    // Decrypt API keys if needed
+    const decryptedCampaigns = await Promise.all(campaigns.map(async (campaign) => {
+      const decryptedKeys = {};
+      if (campaign.apiKeys && typeof campaign.apiKeys === 'object') {
+        for (const [key, value] of Object.entries(campaign.apiKeys)) {
+          if (value) {
+            try {
+              decryptedKeys[key] = await Encryption.decrypt(value);
+            } catch (error) {
+              console.error(`Error decrypting key ${key}:`, error);
+              decryptedKeys[key] = null;
+            }
+          }
+        }
+      }
+      return {
+        ...campaign.toObject(),
+        apiKeys: decryptedKeys
+      };
+    }));
+
+    res.json(decryptedCampaigns);
   } catch (error) {
     console.error('Error getting campaigns:', error);
     res.status(500).json({ message: error.message });
@@ -45,11 +86,48 @@ exports.updateCampaign = async (req, res) => {
       return res.status(404).json({ message: 'Campaign not found' });
     }
 
-    Object.assign(campaign, req.body);
+    const { apiKeys, ...otherUpdates } = req.body;
+
+    // Encrypt new API keys if provided
+    let updates = { ...otherUpdates };
+    if (apiKeys && typeof apiKeys === 'object') {
+      const encryptedKeys = {};
+      for (const [key, value] of Object.entries(apiKeys)) {
+        if (value) {
+          encryptedKeys[key] = await Encryption.encrypt(value);
+        }
+      }
+      updates.apiKeys = encryptedKeys;
+    }
+
+    Object.assign(campaign, updates);
     await campaign.save();
-    res.json(campaign);
+
+    // Decrypt API keys if needed
+    const decryptedKeys = {};
+    if (campaign.apiKeys && typeof campaign.apiKeys === 'object') {
+      for (const [key, value] of Object.entries(campaign.apiKeys)) {
+        if (value) {
+          try {
+            decryptedKeys[key] = await Encryption.decrypt(value);
+          } catch (error) {
+            console.error(`Error decrypting key ${key}:`, error);
+            decryptedKeys[key] = null;
+          }
+        }
+      }
+    }
+
+    // Create a new object with decrypted keys
+    const campaignWithDecryptedKeys = {
+      ...campaign.toObject(),
+      apiKeys: decryptedKeys
+    };
+
+    res.json({ success: true, campaign: campaignWithDecryptedKeys });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    console.error('Error updating campaign:', error);
+    res.status(500).json({ success: false, error: error.message });
   }
 };
 

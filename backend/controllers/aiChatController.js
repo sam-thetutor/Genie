@@ -2,6 +2,7 @@ const mongoose = require('mongoose');
 const { OpenAI, OpenAIEmbeddings } = require('@langchain/openai');
 const { MongoDBAtlasVectorSearch } = require('@langchain/mongodb');
 const fsPromises = require('fs').promises;
+const { secureKey, verifyKey } = require('../utils/secretKey');
 
 const express = require("express");
 const { RecursiveCharacterTextSplitter } = require("langchain/text_splitter");
@@ -16,15 +17,8 @@ const {
 const { PDFLoader } = require("langchain/document_loaders/fs/pdf");
 const { formatConvHistory } = require("./utils/formatConvHistory.js");
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY
-});
-
 const uri = process.env.VITE_MONGODB_ATLAS_URI;
 const client = new MongoClient(uri);
-
-
-
 
 const saveChatInstance = async (req, res) => {
   try {
@@ -40,8 +34,6 @@ const saveChatInstance = async (req, res) => {
 
     const result = await instances.insertOne(newInstance);
     res.json({ success: true, instanceId: result.insertedId });
-
-
 
   } catch (error) {
     res.status(500).json({ message: 'Error saving chat instance' });
@@ -59,7 +51,6 @@ const getAllInstances = async (req, res) => {
         res.status(500).json({ message: 'Error fetching chat instances' });
     }
 };
-
 
 const getChatInstance = async (req, res) => {
     try {
@@ -246,11 +237,42 @@ const getChatHistory = async (req, res) => {
   }
 };
 
+// Function to get secured OpenAI client
+const getSecuredOpenAIClient = async () => {
+  try {
+    const db = client.db(process.env.VITE_MONGODB_ATLAS_DB_NAME);
+    const settings = db.collection("settings");
+    
+    const apiKeySetting = await settings.findOne({ key: 'openai_api_key' });
+    if (!apiKeySetting) {
+      // If no key in DB, secure and save the one from env
+      const { hash, key } = secureKey(process.env.OPENAI_API_KEY);
+      await settings.insertOne({
+        key: 'openai_api_key',
+        hash: hash,
+        createdAt: new Date()
+      });
+      return new OpenAI({ apiKey: key });
+    }
+    
+    // Verify the current key against stored hash
+    if (!verifyKey(process.env.OPENAI_API_KEY, apiKeySetting.hash)) {
+      throw new Error('API key verification failed');
+    }
+    
+    return new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+  } catch (error) {
+    console.error('Error getting secured OpenAI client:', error);
+    throw error;
+  }
+};
+
 const chat = async (req, res) => {
   try {
     const { message: question } = req.body;
-  const instanceId = req.params.id;
-  try {
+    const instanceId = req.params.id;
+
+    const openaiClient = await getSecuredOpenAIClient();
 
     console.log("Chat request:", {
       instanceId,
@@ -272,23 +294,18 @@ const chat = async (req, res) => {
       .db(process.env.VITE_MONGODB_ATLAS_DB_NAME)
       .collection("vectorStore");
 
-
-      
- // // Store chat history
+    // Store chat history
     const chatHistory = client
       .db(process.env.VITE_MONGODB_ATLAS_DB_NAME)
       .collection("chatHistory");
 
-
-//get the chat history for that specific instance
-const convHistory = await chatHistory.find({instanceId: instanceId}).toArray();
-console.log("Chat history:", formatConvHistory(convHistory));
-
-
+    //get the chat history for that specific instance
+    const convHistory = await chatHistory.find({instanceId: instanceId}).toArray();
+    console.log("Chat history:", formatConvHistory(convHistory));
 
     const embeddings = new OpenAIEmbeddings({
       modelName: "text-embedding-3-small",
-      openAIApiKey: process.env.VITE_OPENAI_API_KEY,
+      openAIApiKey: openaiClient.apiKey,
     });
 
     const vectorStore = new MongoDBAtlasVectorSearch(embeddings, {
@@ -317,7 +334,7 @@ console.log("Chat history:", formatConvHistory(convHistory));
 
     const llm = new ChatOpenAI({
       modelName: "gpt-3.5-turbo",
-      openAIApiKey: process.env.VITE_OPENAI_API_KEY,
+      openAIApiKey: openaiClient.apiKey,
       temperature: 0.7,
     });
 
@@ -328,26 +345,22 @@ console.log("Chat history:", formatConvHistory(convHistory));
       return docs.map((doc) => doc.pageContent).join("\n\n");
     };
 
-
     const standaloneQuestionTemplate = `Given some conversation history (if any) and a question, convert the question to a standalone question. 
 conversation history: {conv_history}
 question: {question} 
 standalone question:`
-const standaloneQuestionPrompt = PromptTemplate.fromTemplate(standaloneQuestionTemplate)
+    const standaloneQuestionPrompt = PromptTemplate.fromTemplate(standaloneQuestionTemplate)
 
-const answerTemplate = `You are a helpful and enthusiastic support bot who can answer a given question about Scrimba based on the context provided and the conversation history. Try to find the answer in the context. If the answer is not given in the context, find the answer in the conversation history if possible. If you really don't know the answer, say "I'm sorry, I don't know the answer to that." And direct the questioner to email help@scrimba.com. Don't try to make up an answer. Always speak as if you were chatting to a friend.
+    const answerTemplate = `You are a helpful and enthusiastic support bot who can answer a given question about Scrimba based on the context provided and the conversation history. Try to find the answer in the context. If the answer is not given in the context, find the answer in the conversation history if possible. If you really don't know the answer, say "I'm sorry, I don't know the answer to that." And direct the questioner to email help@scrimba.com. Don't try to make up an answer. Always speak as if you were chatting to a friend.
 context: {context}
 conversation history: {conv_history}
 question: {question}
 answer: `
-const answerPrompt = PromptTemplate.fromTemplate(answerTemplate)
+    const answerPrompt = PromptTemplate.fromTemplate(answerTemplate)
 
-
-const standaloneQuestionChain = standaloneQuestionPrompt
-    .pipe(llm)
-    .pipe(new StringOutputParser())
-
-
+    const standaloneQuestionChain = standaloneQuestionPrompt
+        .pipe(llm)
+        .pipe(new StringOutputParser())
 
     const retrieverChain = RunnableSequence.from([
       prevResult => prevResult.standalone_question,
@@ -377,12 +390,8 @@ const response = await chain.invoke({
   conv_history: convHistory
 })
 
-
-
-   
     console.log("Final response:", response);
 
-   
     await chatHistory.insertOne({
       instanceId,
       message: {
@@ -415,38 +424,7 @@ const response = await chain.invoke({
       details: "Error processing chat request",
     });
   }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    
-    
-
-
-  } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
-  }
 };
-
-
-
-
-
-
 
 module.exports = {
   saveChatInstance,
