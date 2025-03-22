@@ -21,10 +21,14 @@ contentScheduler.start();
 
 // Middleware
 app.use(cors({
-  origin: 'http://localhost:5174', // Vite's default port
+  origin: '*', // Allow all origins
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
-  allowedHeaders: ['Content-Type']
+  allowedHeaders: ['Content-Type'],
+  credentials: true
 }));
+
+
+
 app.use(helmet());
 app.use(express.json());
 

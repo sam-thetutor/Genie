@@ -41,11 +41,12 @@ A comprehensive social media management platform that combines campaign scheduli
   - Secure session management
 
 ### Analytics & Monitoring
-- **Campaign Analytics**: 
+
+- **Campaign Analytics**:
   - Track post performance
   - View engagement metrics
   - Monitor scheduling status
-- **Dashboard**: 
+- **Dashboard**:
   - Overview of all campaigns
   - Recent activity tracking
   - Quick access to common actions
@@ -53,6 +54,7 @@ A comprehensive social media management platform that combines campaign scheduli
 ## 🛠 Technical Stack
 
 ### Frontend
+
 - React.js
 - Tailwind CSS
 - Axios for API calls

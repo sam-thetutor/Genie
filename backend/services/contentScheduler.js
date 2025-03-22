@@ -1,5 +1,7 @@
 const { BotClientFactory } = require('@open-ic/openchat-botclient-ts');
 const Content = require('../models/Content');
+const Encryption = require('../utils/encryption');
+const Campaign = require('../models/Campaign');
 
 
 const factory = new BotClientFactory({
@@ -8,9 +10,6 @@ const factory = new BotClientFactory({
   openStorageCanisterId: process.env.STORAGE_INDEX_CANISTER,
   identityPrivateKey: process.env.IDENTITY_PRIVATE,
 });
-
-
-
 
 
 class ContentScheduler {
@@ -139,14 +138,23 @@ class ContentScheduler {
   async postToOpenChat(content) {
     return new Promise(async (resolve, reject) => {
       try {
+//fetch the campagin in order to get the apiKey
+        const campaign = await Campaign.findById(content.campaignId);
+        console.log("campaign",campaign)
+
+
+        console.log("campaign",content)
         console.log('Would post to OpenChat with:', {
           apiKey: content.campaignId.apiKey,
           content: content.content,
           campaignName: content.campaignId.name
         });
 
+        //decrypt the apikey
+        const decryptedApiKey = await Encryption.decrypt(content.campaignId.apiKey);
+
         // Create the OpenChat context object
-        let client = factory.createClientFromApiKey(content.campaignId.apiKey);
+        let client = factory.createClientFromApiKey(decryptedApiKey);
         let resz = await client.createTextMessage(content.content);
         
         console.log("text message sending results:", resz);

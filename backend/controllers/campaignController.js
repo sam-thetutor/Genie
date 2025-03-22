@@ -10,29 +10,32 @@ exports.createCampaign = async (req, res) => {
       return res.status(400).json({ errors: errors.array() });
     }
 
-    console.log('Creating campaign with data:', req.body);
-    const { name, platform, apiKeys = {}, schedule, ...otherDetails } = req.body;
+    const { name, apiKey, schedule, principal, startDate, endDate } = req.body;
 
-    // Encrypt API keys
-    const encryptedKeys = {};
-    if (apiKeys && typeof apiKeys === 'object') {
-      for (const [key, value] of Object.entries(apiKeys)) {
-        if (value) {
-          encryptedKeys[key] = await Encryption.encrypt(value);
-        }
-      }
+    if (!principal) {
+      return res.status(400).json({ message: 'Principal is required' });
     }
+
+    // Encrypt the API key
+    const encryptedApiKey = await Encryption.encrypt(apiKey);
 
     const campaign = new Campaign({
       name,
-      platform,
-      apiKeys: encryptedKeys,
+      principal,
+      apiKey: encryptedApiKey,
       schedule,
-      ...otherDetails
+      startDate: new Date(startDate),
+      endDate: endDate ? new Date(endDate) : undefined,
+      status: 'active'
     });
+
     await campaign.save();
-    console.log('Campaign created:', campaign);
-    res.status(201).json(campaign);
+    
+    // Return the campaign without sensitive data
+    const campaignResponse = campaign.toObject();
+    delete campaignResponse.apiKeys;
+
+    res.status(201).json(campaignResponse);
   } catch (error) {
     console.error('Error creating campaign:', error);
     res.status(500).json({ message: error.message });

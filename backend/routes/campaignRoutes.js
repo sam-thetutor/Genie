@@ -15,7 +15,10 @@ router.post('/', [
     .withMessage('API key is required')
     .isString()
     .withMessage('API key must be a string')
-    .trim(),
+    .trim(), 
+  check('principal')
+    .notEmpty()
+    .withMessage('Principal is required'),
   check('startDate')
     .notEmpty()
     .withMessage('Start date is required')
@@ -24,11 +27,7 @@ router.post('/', [
   check('endDate')
     .optional({ nullable: true })
     .isISO8601()
-    .withMessage('Invalid end date format'),
-  check('status')
-    .optional()
-    .isIn(['active', 'paused'])
-    .withMessage('Invalid status')
+    .withMessage('Invalid end date format')
 ], campaignController.createCampaign);
 
 router.get('/', campaignController.getCampaigns);

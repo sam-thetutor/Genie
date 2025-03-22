@@ -11,9 +11,13 @@ const campaignSchema = new mongoose.Schema({
     required: true,
     trim: true
   },
-  apiKey: {
-    type: String,
+  apiKeys: {
+    type: Object,
     required: true
+  },
+  schedule: {
+    type: Object,
+    default: {}
   },
   startDate: {
     type: Date,
