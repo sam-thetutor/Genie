@@ -22,8 +22,6 @@ Genie is an AI-powered social media management platform that helps you manage an
 
 ![3](./src/assets/3.png)
 
-
-
 - **Analytics**
   - Track engagement metrics
   - Monitor performance across platforms
