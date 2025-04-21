@@ -27,12 +27,14 @@ Genie is an AI-powered social media management platform that helps you manage an
 ## Tech Stack
 
 ### Frontend
+
 - React.js
 - TailwindCSS
 - Shadcn/ui Components
 - Internet Identity Authentication
 
 ### Backend
+
 - Node.js
 - Express
 - MongoDB
@@ -43,11 +45,13 @@ Genie is an AI-powered social media management platform that helps you manage an
 ## Getting Started
 
 ### Prerequisites
+
 - Node.js (v16 or higher)
 - MongoDB
 - Telegram Bot Token
 - Discord Bot Token
 - OpenChat API Key
+
 
 ### Environment Variables
 
@@ -69,6 +73,7 @@ IDENTITY_PRIVATE=your_identity_private_key
 ### Installation
 
 1. Clone the repository:
+
 ```bash
 git clone https://github.com/yourusername/genie.git
 cd genie
