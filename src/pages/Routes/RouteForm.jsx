@@ -1,16 +1,30 @@
 import React, { useState } from 'react';
 import TwitterRouteForm from '../../components/TwitterRouteForm';
 import { toast } from 'react-hot-toast';
+import { Label } from "../../components/ui/label";
+import { Input } from "../../components/ui/input";
+import { Button } from "../../components/ui/button";
 
-function RouteForm({ onSubmit, onCancel, initialData }) {
+const RouteForm = ({ onSubmit, onCancel, initialData }) => {
   const [formData, setFormData] = useState({
     name: '',
     platform: 'twitter',
     sourceId: '',
     openchatApiKey: '',
     twitterUsername: '',
+    telegramUsername: '',
+    discordUsername: '',
     includeRetweets: false,
     includeReplies: false,
+    sourceType: 'telegram',
+    destinationType: 'openchat',
+    source: {
+      chatId: '',
+      username: ''
+    },
+    destination: {
+      chatId: ''
+    },
     filters: {
       includeText: true,
       includeImages: true,
@@ -22,9 +36,7 @@ function RouteForm({ onSubmit, onCancel, initialData }) {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    console.log('Submitting form data:', formData);
-
-    // Validate required fields
+    
     if (!formData.name) {
       toast.error('Route name is required');
       return;
@@ -37,21 +49,37 @@ function RouteForm({ onSubmit, onCancel, initialData }) {
 
     if (formData.platform === 'twitter') {
       if (!formData.twitterUsername || formData.twitterUsername.trim() === '') {
-        console.log('Twitter validation failed:', formData);
         toast.error('Twitter username is required');
+        return;
+      }
+    }
+
+    if (formData.platform === 'telegram') {
+      if (!formData.telegramUsername || formData.telegramUsername.trim() === '') {
+        toast.error('Telegram username is required');
         return;
       }
     }
 
     const submitData = {
       ...formData,
+      sourceType: formData.platform,
+      destinationType: 'openchat',
+      source: {
+        chatId: formData.sourceId,
+        username: formData.platform === 'telegram' ? formData.telegramUsername : 
+                 formData.platform === 'discord' ? formData.discordUsername : 
+                 formData.twitterUsername
+      },
+      destination: {
+        chatId: formData.openchatApiKey
+      },
       ...(formData.platform === 'twitter' && {
         twitterUsername: formData.twitterUsername.trim(),
         sourceId: formData.twitterUsername.trim()
       }),
     };
 
-    console.log('Final submit data:', submitData);
     onSubmit(submitData);
   };
 
@@ -84,14 +112,26 @@ function RouteForm({ onSubmit, onCancel, initialData }) {
                 <li>Copy that ID and paste it here</li>
               </ol>
             </div>
-            <input
-              type="text"
+            
+            <Input
               value={formData.sourceId}
               onChange={(e) => setFormData({ ...formData, sourceId: e.target.value })}
-              className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-700"
               placeholder="Enter the group ID (e.g., -1001234567890)"
-              required
             />
+            <div>
+
+              <h3 className="text-sm font-semibold mt-3 text-gray-500">
+                Telegram Username
+              </h3>
+
+              <Input
+                className="mt-1"
+                value={formData.telegramUsername}
+                onChange={(e) => setFormData({ ...formData, telegramUsername: e.target.value })}
+                placeholder="Enter the telegram username"
+              />
+
+            </div>
           </>
         );
       case 'discord':
@@ -114,13 +154,10 @@ function RouteForm({ onSubmit, onCancel, initialData }) {
                 <li>Click "Copy Channel ID" and paste it here</li>
               </ol>
             </div>
-            <input
-              type="text"
+            <Input
               value={formData.sourceId}
               onChange={(e) => setFormData({ ...formData, sourceId: e.target.value })}
-              className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-700"
               placeholder="Enter the channel ID"
-              required
             />
           </>
         );
@@ -137,23 +174,16 @@ function RouteForm({ onSubmit, onCancel, initialData }) {
 
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-            Route Name
-          </label>
-          <input
-            type="text"
+          <Label>Route Name</Label>
+          <Input
             value={formData.name}
             onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-            className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-700"
-            placeholder="My Route"
-            required
+            placeholder="Enter route name"
           />
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-            Platform
-          </label>
+          <Label>Platform</Label>
           <select
             value={formData.platform}
             onChange={(e) => setFormData(prev => ({ ...prev, platform: e.target.value }))}
@@ -167,9 +197,7 @@ function RouteForm({ onSubmit, onCancel, initialData }) {
 
         {formData.platform !== 'twitter' && (
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-              Source Channel ID
-            </label>
+            <Label>Source Channel ID</Label>
             {renderPlatformSpecificFields()}
           </div>
         )}
@@ -181,37 +209,33 @@ function RouteForm({ onSubmit, onCancel, initialData }) {
 
         {/* OpenChat API Key input for all platforms */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-            OpenChat API Key
-          </label>
-          <input
+          <Label>OpenChat API Key</Label>
+          <Input
             type="password"
             value={formData.openchatApiKey}
             onChange={(e) => setFormData({ ...formData, openchatApiKey: e.target.value })}
-            className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-700"
             placeholder="Enter OpenChat API key"
-            required
           />
         </div>
 
         <div className="flex justify-end space-x-4 mt-6">
-          <button
+          <Button
             type="button"
             onClick={onCancel}
             className="px-4 py-2 text-gray-600 hover:text-gray-700 dark:text-gray-300"
           >
             Cancel
-          </button>
-          <button
+          </Button>
+          <Button
             type="submit"
             className="px-6 py-2 bg-blue-500 text-black rounded-md hover:bg-blue-600"
           >
             {initialData ? 'Update Route' : 'Create Route'}
-          </button>
+          </Button>
         </div>
       </form>
     </div>
   );
-}
+};
 
 export default RouteForm; 

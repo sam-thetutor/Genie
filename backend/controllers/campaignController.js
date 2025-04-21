@@ -5,6 +5,7 @@ const Encryption = require('../utils/encryption');
 exports.createCampaign = async (req, res) => {
   try {
     const errors = validationResult(req);
+    console.log("incoming campaign :",req.body);
     if (!errors.isEmpty()) {
       console.log('Validation errors:', errors.array());
       return res.status(400).json({ errors: errors.array() });
@@ -33,7 +34,7 @@ exports.createCampaign = async (req, res) => {
     
     // Return the campaign without sensitive data
     const campaignResponse = campaign.toObject();
-    delete campaignResponse.apiKeys;
+    delete campaignResponse.apiKey;
 
     res.status(201).json(campaignResponse);
   } catch (error) {

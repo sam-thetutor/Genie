@@ -11,7 +11,7 @@ const campaignSchema = new mongoose.Schema({
     required: true,
     trim: true
   },
-  apiKeys: {
+  apiKey: {
     type: Object,
     required: true
   },

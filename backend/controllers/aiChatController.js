@@ -27,7 +27,7 @@ const saveChatInstance = async (req, res) => {
     const instances = db.collection("instances");
 
     const newInstance = {
-      name: req.body.name || `Chat Instance ${Date.now()}`,
+      name: req.body.name || `Chat${Date.now()}`,
       createdAt: new Date(),
       documentName: null,
     };
@@ -48,7 +48,10 @@ const getAllInstances = async (req, res) => {
         const allInstances = await instances.find({}).toArray();
         res.json({ success: true, instances: allInstances });
     } catch (error) {
-        res.status(500).json({ message: 'Error fetching chat instances' });
+        res.status(500).json({ 
+          success: false,
+          instances: [],
+          message: 'Error fetching chat instances' });
     }
 };
 

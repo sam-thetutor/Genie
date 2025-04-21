@@ -9,6 +9,7 @@ const contentScheduler = require('./services/contentScheduler');
 const telegramBot = require('./services/telegramBot');
 const discordBot = require('./services/discordBot');
 const twitterBot = require('./services/twitterBot');
+const { Permissions } = require('@open-ic/openchat-botclient-ts');
 
 
 const app = express();
@@ -28,19 +29,61 @@ app.use(cors({
 }));
 
 
+const emptyPermissions = {
+  message: [],
+  community: [],
+  chat: [],
+};
+
+let schema =  {
+  autonomous_config: {
+    sync_api_key: true,
+    permissions: Permissions.encodePermissions({
+      message: ["Text", "Image", "P2pSwap", "VideoCall"],
+      community: [
+        "RemoveMembers",
+        "ChangeRoles",
+        "CreatePublicChannel",
+        "CreatePrivateChannel",
+        "CreateChannel",
+        "DeleteChannel",
+      ],
+      chat: ["ReadMessages"],
+    }),
+  },
+  description:
+    "This is a demonstration bot which demonstrates a variety of different approaches and techniques that bot developers can use.",
+  commands: [
+    {
+      name: "newsAnchors",
+      default_role: "Owner",
+      description: "Start pinging this context",
+      permissions: Permissions.encodePermissions({
+        ...emptyPermissions,
+        message: ["Text"],
+      }),
+      params: [],
+    }
+  ],
+}
+
 
 app.use(helmet());
 app.use(express.json());
+
 
 // Routes
 app.use('/api/campaigns', require('./routes/campaignRoutes'));
 app.use('/api/contents', require('./routes/contentRoutes'));
 app.use('/api', require('./routes/aiRoutes'));
+ 
 app.use('/api/routes', require('./routes/routeRoutes'));
 app.use('/api/analytics', require('./routes/analyticsRoutes'));
 app.use('/api/ai-chat', require('./routes/aiChatRoutes'));
 
-
+app.use('/', (req, res)=>{
+  res.status(200).json(schema);
+ });
 // 404 handler
 app.use((req, res) => {
   res.status(404).json({ message: 'Route not found' });
@@ -59,14 +102,15 @@ process.on('SIGTERM', () => {
   process.exit(0);
 });
 
+
 process.on('SIGINT', () => {
   console.log('SIGINT received. Shutting down gracefully...');
   contentScheduler.stop();
   process.exit(0);
 });
 
-// telegramBot.start();
-discordBot.start();
+ telegramBot.start();
+//discordBot.start();
 // twitterBot.start();
 const PORT = process.env.PORT || 6000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));

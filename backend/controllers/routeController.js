@@ -1,7 +1,7 @@
 const Route = require('../models/Route');
 const { validationResult } = require('express-validator');
 
-exports.createRoute = async (req, res) => {
+const createRoute = async (req, res) => {
   try {
     const {
       principal,
@@ -10,9 +10,15 @@ exports.createRoute = async (req, res) => {
       sourceId,
       openchatApiKey,
       twitterUsername,
+      telegramUsername,
+      discordUsername,
       includeRetweets,
       includeReplies,
-      filters
+      filters,
+      sourceType,
+      destinationType,
+      source,
+      destination
     } = req.body;
 
     // Validate platform-specific requirements
@@ -28,12 +34,27 @@ exports.createRoute = async (req, res) => {
       platform,
       sourceId,
       openchatApiKey,
-      // Add Twitter-specific fields if platform is Twitter
+      sourceType: platform,
+      destinationType: 'openchat',
+      source: {
+        chatId: sourceId,
+        username: platform === 'telegram' ? telegramUsername : 
+                 platform === 'discord' ? discordUsername : 
+                 twitterUsername
+      },
+      destination: {
+        chatId: openchatApiKey
+      },
       ...(platform === 'twitter' && {
         twitterUsername,
         includeRetweets: includeRetweets || false,
         includeReplies: includeReplies || false,
-        monitoringInterval: 1
+      }),
+      ...(platform === 'telegram' && {
+        telegramUsername,
+      }),
+      ...(platform === 'discord' && {
+        discordUsername,
       }),
       filters: filters || {
         includeText: true,
@@ -51,7 +72,7 @@ exports.createRoute = async (req, res) => {
   }
 };
 
-exports.getRoutes = async (req, res) => {
+const getRoutes = async (req, res) => {
   try {
     const { principal } = req.query;
     
@@ -67,7 +88,7 @@ exports.getRoutes = async (req, res) => {
   }
 };
 
-exports.updateRoute = async (req, res) => {
+const updateRoute = async (req, res) => {
   try {
     const {
       principal,
@@ -76,6 +97,8 @@ exports.updateRoute = async (req, res) => {
       sourceId,
       openchatApiKey,
       twitterUsername,
+      telegramUsername,
+      discordUsername,
       includeRetweets,
       includeReplies,
       filters
@@ -119,7 +142,7 @@ exports.updateRoute = async (req, res) => {
   }
 };
 
-exports.deleteRoute = async (req, res) => {
+const deleteRoute = async (req, res) => {
   try {
     const route = await Route.findById(req.params.id);
     if (!route) {
@@ -136,4 +159,11 @@ exports.deleteRoute = async (req, res) => {
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
+};
+
+module.exports = {
+  createRoute,
+  getRoutes,
+  updateRoute,
+  deleteRoute
 }; 

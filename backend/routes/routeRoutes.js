@@ -3,6 +3,7 @@ const router = express.Router();
 const { check } = require('express-validator');
 const routeController = require('../controllers/routeController');
 
+
 router.post('/', [
   check('name')
     .notEmpty()

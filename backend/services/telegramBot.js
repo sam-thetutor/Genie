@@ -59,7 +59,6 @@ class TelegramBotService {
       this.bot.on('polling_error', (error) => {
         console.error('Telegram bot polling error:', error);
       });
-
     } catch (error) {
       console.error('Failed to start Telegram bot:', error);
     }
@@ -87,46 +86,32 @@ class TelegramBotService {
   }
 
   async handleMessage(msg) {
-    console.log('Full message object:', JSON.stringify(msg, null, 2));
-    
-    console.log("Incoming message:", {
-      chatId: msg.chat.id,
-      chatType: msg.chat.type,
-      messageType: msg.text ? 'text' : msg.caption ? 'media_with_caption' : 'other',
-      content: msg.text || msg.caption || 'no text content'
-    });
-    const channelId = msg.chat.id.toString();
-    
-    const routes = await Route.find({
-      platform: 'telegram',
-      sourceId: channelId,
-      status: 'active'
-    });
+    try {
+      // Find routes that match this chat
+      const routes = await Route.find({ 
+        sourceType: 'telegram',
+        'source.chatId': msg.chat.id.toString(),
+        active: true 
+      });
+console.log("routes found ",routes)
+      for (const route of routes) {
+        // Skip if username filter is set and doesn't match
+        console.log("route.source.username",route.source.username)
+        if (route.source.username && msg.from.username != route.source.username) {
+          continue;
+        }
 
-    console.log(`Found ${routes.length} active routes for channel ${channelId}`);
+        // Process the message
+        const content = msg.text || msg.caption || '';
+        const media = msg.photo ? msg.photo[msg.photo.length - 1] : null;
 
-    if (routes.length === 0) {
-      console.log(`No active routes found for channel ${channelId}`);
-      return;
-    }
-
-    for (const route of routes) {
-      try {
-        console.log(`Forwarding message to OpenChat for route ${route._id}`);
+        // Forward to destinations...
+        console.log("forwarding to openchat")
         await this.forwardToOpenChat(msg, route);
-        
-        route.lastSync = new Date();
-        route.lastError = null;
-        route.errorCount = 0;
-        await route.save();
-        console.log(`Successfully forwarded message for route ${route._id}`);
-
-      } catch (error) {
-        console.error(`Failed to forward message for route ${route._id}:`, error);
-        route.lastError = error.message;
-        route.errorCount += 1;
-        await route.save();
+        // Your existing forwarding logic here
       }
+    } catch (error) {
+      console.error('Error handling Telegram message:', error);
     }
   }
 
@@ -179,6 +164,8 @@ class TelegramBotService {
       console.log('Telegram bot stopped');
     }
   }
+
+
 }
 
 module.exports = new TelegramBotService(); 

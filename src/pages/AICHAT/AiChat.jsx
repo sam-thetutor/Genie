@@ -174,6 +174,7 @@ console.log("selectedInstance", selectedInstance);
 
       await uploadAIFile(selectedInstance._id, formData);
       toast.success('PDF uploaded successfully');
+      await loadChatInstances();
     } catch (error) {
       console.error('Upload error:', error);
       toast.error('Failed to upload PDF');
@@ -260,8 +261,14 @@ console.log("selectedInstance", selectedInstance);
           <>
             {/* Chat Header */}
             <div className="p-4 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">
-              <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-200">
+              <h2 className="text-lg flex flex-col font-semibold text-gray-800 dark:text-gray-200">
+                <span className='text-2xl'>
                 {selectedInstance.name}
+
+                </span>
+                <span className="text-xs text-gray-500 dark:text-gray-400">
+                  {selectedInstance.documentName}
+                </span>
               </h2>
               <div className="file-upload">
                 <input

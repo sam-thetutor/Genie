@@ -1,0 +1,7 @@
+npm install class-variance-authority clsx tailwind-merge lucide-react @radix-ui/react-dropdown-menu @radix-ui/react-slot tailwindcss-animate @radix-ui/react-label -D
+npm uninstall @tailwindcss/vite
+npm uninstall tailwindcss postcss autoprefixer
+npm install -D tailwindcss@^3.4.1 postcss@^8.4.38 autoprefixer@^10.4.19
+npm install @radix-ui/react-menubar
+npx tailwindcss init -p 
+mv postcss.config.js postcss.config.cjs 

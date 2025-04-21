@@ -1,6 +1,7 @@
 import React from 'react';
 import { useAuth } from '@nfid/identitykit/react';
 import { useNavigate } from 'react-router-dom';
+import { Button } from '../components/ui/button';
 
 function Home() {
   const { user, connect } = useAuth();
@@ -28,12 +29,24 @@ function Home() {
           </p>
           <div className="mt-5 max-w-md mx-auto sm:flex sm:justify-center md:mt-8">
             <div className="rounded-md shadow">
-              <button
-                onClick={handleGetStarted}
-                className="w-full flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 md:py-4 md:text-lg md:px-10"
+             
+             {
+              !user ? (
+                <Button
+                  onClick={handleGetStarted}
+                  variant="default"
+                >
+                  Connect Wallet
+                </Button>
+              ) : (
+                <Button
+                onClick={() => navigate("/schedule")}
+                variant="default"
               >
-                Get Started
-              </button>
+Schedule your first post
+              </Button>
+              )
+            }
             </div>
           </div>
         </div>
