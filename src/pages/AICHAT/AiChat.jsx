@@ -195,7 +195,7 @@ console.log("selectedInstance", selectedInstance);
         <div className="p-4 border-b border-gray-200 dark:border-gray-700">
           <button
             onClick={() => setIsCreatingNew(true)}
-            className="w-full px-4 py-2 bg-blue-500 text-black rounded-lg hover:bg-blue-600 transition-colors"
+            className="w-full px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
           >
             New Chat
           </button>
@@ -214,7 +214,7 @@ console.log("selectedInstance", selectedInstance);
             <div className="flex space-x-2">
               <button
                 onClick={handleCreateInstance}
-                className="px-3 py-1 bg-green-500 text-black rounded-md hover:bg-green-600"
+                className="px-3 py-1 bg-blue-500 text-white rounded-md hover:bg-blue-600"
               >
                 Create
               </button>
@@ -223,7 +223,7 @@ console.log("selectedInstance", selectedInstance);
                   setIsCreatingNew(false);
                   setNewInstanceName('');
                 }}
-                className="px-3 py-1 bg-gray-500 text-black rounded-md hover:bg-gray-600"
+                className="px-3 py-1 bg-black text-white rounded-md hover:bg-gray-600"
               >
                 Cancel
               </button>
@@ -280,7 +280,7 @@ console.log("selectedInstance", selectedInstance);
                 />
                 <button
                   onClick={handlePDFUpload}
-                  className={`flex items-center gap-2 px-4 py-2 bg-blue-500 text-black rounded-lg hover:bg-blue-600 transition-colors ${
+                  className={`flex items-center gap-2 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors ${
                     isUploading ? 'opacity-50 cursor-not-allowed' : ''
                   }`}
                   disabled={isUploading}
@@ -363,7 +363,7 @@ console.log("selectedInstance", selectedInstance);
                 />
                 <button 
                   onClick={handleSendMessage}
-                  className={`px-4 py-2 bg-blue-500 text-black rounded-lg hover:bg-blue-600 transition-colors ${
+                  className={`px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors ${
                     isAiResponding ? 'opacity-50 cursor-not-allowed' : ''
                   }`}
                   disabled={isAiResponding}

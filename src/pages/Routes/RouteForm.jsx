@@ -222,13 +222,13 @@ const RouteForm = ({ onSubmit, onCancel, initialData }) => {
           <Button
             type="button"
             onClick={onCancel}
-            className="px-4 py-2 text-gray-600 hover:text-gray-700 dark:text-gray-300"
+            className="px-4 py-2 text-white hover:text-gray-700 dark:text-gray-300"
           >
             Cancel
           </Button>
           <Button
             type="submit"
-            className="px-6 py-2 bg-blue-500 text-black rounded-md hover:bg-blue-600"
+            className="px-6 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600"
           >
             {initialData ? 'Update Route' : 'Create Route'}
           </Button>

@@ -128,7 +128,7 @@ function Schedule() {
             </button>
             <button
               onClick={() => setIsCreating(true)}
-              className="px-4 py-2 bg-blue-500 text-black rounded-md hover:bg-blue-600"
+              className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600"
             >
               Create Campaign
             </button>
@@ -168,14 +168,14 @@ function Schedule() {
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                  OpenChat API Key
+                  OpenChat Key
                 </label>
                 <input
                   type="password"
                   value={apiKey}
                   onChange={(e) => setApiKey(e.target.value)}
                   className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                  placeholder="Enter your OpenChat API key"
+                  placeholder="Enter api key of the OpenChat account you want to schedule posts"
                 />
               </div>
 
@@ -216,7 +216,7 @@ function Schedule() {
                 </button>
                 <button
                   onClick={handleCreateCampaign}
-                  className="px-6 py-2 bg-blue-500 text-black rounded-md hover:bg-blue-600"
+                  className="px-6 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600"
                 >
                   Create Campaign
                 </button>
