@@ -59,6 +59,7 @@ MONGODB_URI=your_mongodb_uri
 NODE_ENV=development
 TELEGRAM_BOT_TOKEN=your_telegram_bot_token
 DISCORD_BOT_TOKEN=your_discord_bot_token
+OPENAI_API_KEY=your_openai_api_key
 OC_PUBLIC=your_openchat_public_key
 IC_HOST=your_ic_host
 STORAGE_INDEX_CANISTER=your_storage_canister_id
@@ -122,3 +123,26 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - OpenChat for providing the chat infrastructure
 - Internet Computer for decentralized identity management
 - Shadcn/ui for the beautiful component library
+
+## Environment Setup
+
+1. Copy the example environment file:
+```bash
+cp backend/.env.example backend/.env
+```
+
+2. Update the `.env` file with your actual values:
+```env
+PORT=5000
+MONGODB_URI=your_mongodb_uri
+NODE_ENV=development
+TELEGRAM_BOT_TOKEN=your_telegram_bot_token
+DISCORD_BOT_TOKEN=your_discord_bot_token
+OPENAI_API_KEY=your_openai_api_key
+OC_PUBLIC=your_openchat_public_key
+IC_HOST=your_ic_host
+STORAGE_INDEX_CANISTER=your_storage_canister_id
+IDENTITY_PRIVATE=your_identity_private_key
+```
+
+⚠️ Never commit the actual `.env` file with real credentials to version control!
