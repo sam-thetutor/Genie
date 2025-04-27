@@ -9,25 +9,16 @@ const contentScheduler = require('./services/contentScheduler');
 const telegramBot = require('./services/telegramBot');
 const discordBot = require('./services/discordBot');
 const twitterBot = require('./services/twitterBot');
-const { Permissions } = require('@open-ic/openchat-botclient-ts');
+const { Permissions, BotClientFactory } = require('@open-ic/openchat-botclient-ts');
+const { createCommandChatClient } = require('./middleware/botClient');
+const { default: executeCommand } = require('./handlers/executeCommand');
 
 
 const app = express();
-
 // Connect to database
 connectDB();
-
 // Start content scheduler
 contentScheduler.start();
-
-// Middleware
-app.use(cors({
-  origin: '*', // Allow all origins
-  methods: ['GET', 'POST', 'PUT', 'DELETE'],
-  allowedHeaders: ['Content-Type'],
-  credentials: true
-}));
-
 
 const emptyPermissions = {
   message: [],
@@ -52,12 +43,12 @@ let schema =  {
     }),
   },
   description:
-    "This is a demonstration bot which demonstrates a variety of different approaches and techniques that bot developers can use.",
+    "Genie allows you to manage content across multiple openchat groups,accounts and communities",
   commands: [
     {
-      name: "newsAnchors",
+      name: "aboutGenie",
       default_role: "Owner",
-      description: "Start pinging this context",
+      description: "A Description of what Genie is and how it works",
       permissions: Permissions.encodePermissions({
         ...emptyPermissions,
         message: ["Text"],
@@ -68,22 +59,31 @@ let schema =  {
 }
 
 
-app.use(helmet());
+app.use(cors());
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
 
-// Routes
+
+app.get('/', (req, res)=>{
+  res.status(200).json(schema);
+})
+
+app.get('/bot_definition', (req, res)=>{
+  res.status(200).json(schema);
+})
+app.post('/execute_command', executeCommand)
+
+// // Routes for the for the frontend
 app.use('/api/campaigns', require('./routes/campaignRoutes'));
 app.use('/api/contents', require('./routes/contentRoutes'));
 app.use('/api', require('./routes/aiRoutes'));
- 
+app.use('/api/execute_command', require('./routes/commanRoutes'));
 app.use('/api/routes', require('./routes/routeRoutes'));
 app.use('/api/analytics', require('./routes/analyticsRoutes'));
 app.use('/api/ai-chat', require('./routes/aiChatRoutes'));
 
-app.use('/', (req, res)=>{
-  res.status(200).json(schema);
- });
+
 // 404 handler
 app.use((req, res) => {
   res.status(404).json({ message: 'Route not found' });
