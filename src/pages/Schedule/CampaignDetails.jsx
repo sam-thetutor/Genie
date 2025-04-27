@@ -49,10 +49,14 @@ function CampaignDetails({ campaign, onBack }) {
     }
 
     try {
+      // Convert local time to UTC before sending to server
+      const localDate = new Date(scheduledTime);
+      const utcTime = new Date(localDate.getTime() - localDate.getTimezoneOffset() * 60000);
+
       const newContent = {
         campaignId: campaign._id,
         content,
-        scheduledTime,
+        scheduledTime: utcTime.toISOString(), // Send UTC time to server
         status: 'pending'
       };
 
@@ -123,6 +127,12 @@ function CampaignDetails({ campaign, onBack }) {
     } catch (err) {
       toast.error('Failed to schedule some posts');
     }
+  };
+
+  // When displaying times, convert UTC back to local
+  const formatDateTime = (utcTime) => {
+    const date = new Date(utcTime);
+    return date.toLocaleString(); // This will show time in user's local timezone
   };
 
   return (
@@ -248,7 +258,7 @@ function CampaignDetails({ campaign, onBack }) {
                         {content.status}
                       </span>
                       <span className="text-sm text-gray-500 dark:text-gray-400">
-                        Scheduled for: {new Date(content.scheduledTime).toLocaleString()}
+                        Scheduled for: {formatDateTime(content.scheduledTime)}
                       </span>
                     </div>
                     <p className="text-gray-800 dark:text-gray-200 whitespace-pre-wrap">
