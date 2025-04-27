@@ -48,15 +48,21 @@ function CampaignDetails({ campaign, onBack }) {
       return;
     }
 
+    const localDate = new Date(scheduledTime);
+    const gmtTime = localDate.toISOString();
+
+    console.log("GMT Time: ", gmtTime,localDate,scheduledTime);
     try {
       // Send exact time without timezone conversion
       const newContent = {
         campaignId: campaign._id,
         content,
-        scheduledTime: scheduledTime, // Send the exact time selected
+        scheduledTime: gmtTime, // Send the exact time selected
         status: 'pending'
       };
 
+      console.log("New Content: ", newContent);
+      //  throw new Error("Test Error");
       if (editingContent) {
         await updateContent(editingContent._id, newContent);
       } else {
@@ -130,7 +136,9 @@ function CampaignDetails({ campaign, onBack }) {
   const formatDateTime = (time) => {
     if (!time) return '';
     const date = new Date(time);
-    return date.toLocaleString('default', {
+    console.log("Date hhhhhh : ", date,time);
+    
+    let formattedDate = time.toLocaleString('default', {
       year: 'numeric',
       month: 'numeric',
       day: 'numeric',
@@ -138,6 +146,10 @@ function CampaignDetails({ campaign, onBack }) {
       minute: '2-digit',
       hour12: false
     });
+
+    console.log("Formatted Date: ", formattedDate);
+    
+    return formattedDate;
   };
 
   return (

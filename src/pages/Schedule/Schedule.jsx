@@ -61,6 +61,9 @@ function Schedule() {
         principal: user?.principal?.toString()
       };
 
+      console.log("New Campaign: ", newCampaign);
+
+      throw new Error("Test Error");
       await createCampaign(newCampaign);
       await loadCampaigns();
       setIsCreating(false);
