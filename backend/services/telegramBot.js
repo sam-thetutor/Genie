@@ -22,6 +22,7 @@ class TelegramBotService {
       this.botId = botInfo.id;
 
       this.bot.on('new_chat_members', async (msg) => {
+        console.log("bot is added to the group")
         try {
           const newMembers = msg.new_chat_members;
           if (newMembers.some(member => member.id === this.botId)) {
@@ -36,11 +37,7 @@ class TelegramBotService {
 
       this.bot.on('message', async (msg) => {
         try {
-          console.log('New message received:', {
-            chatId: msg.chat.id,
-            chatType: msg.chat.type,
-            message: msg.text
-          });
+          console.log('New message received:', msg);
           
           if (['group', 'supergroup', 'channel'].includes(msg.chat.type)) {
             await this.handleMessage(msg);
@@ -82,12 +79,14 @@ class TelegramBotService {
 
   async handleMessage(msg) {
     try {
+      console.log("handleMessage")
       // Find routes that match this chat
       const routes = await Route.find({ 
         sourceType: 'telegram',
         'source.chatId': msg.chat.id.toString(),
         active: true 
       });
+      console.log("routes",routes)
 
       for (const route of routes) {
         // Skip if username filter is set and doesn't match
