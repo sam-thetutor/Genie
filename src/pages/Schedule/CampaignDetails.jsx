@@ -49,14 +49,20 @@ function CampaignDetails({ campaign, onBack }) {
     }
 
     try {
-      // Convert local time to UTC before sending to server
+      // Convert local time to UTC before sending
       const localDate = new Date(scheduledTime);
-      const utcTime = new Date(localDate.getTime() - localDate.getTimezoneOffset() * 60000);
+      const utcDate = new Date(Date.UTC(
+        localDate.getFullYear(),
+        localDate.getMonth(),
+        localDate.getDate(),
+        localDate.getHours(),
+        localDate.getMinutes()
+      ));
 
       const newContent = {
         campaignId: campaign._id,
         content,
-        scheduledTime: utcTime.toISOString(), // Send UTC time to server
+        scheduledTime: utcDate.toISOString(),
         status: 'pending'
       };
 
@@ -75,15 +81,15 @@ function CampaignDetails({ campaign, onBack }) {
   };
 
   const handleEdit = (content) => {
-    // Format the date string to match the datetime-local input format
-    const formatDateForInput = (dateString) => {
-      const date = new Date(dateString);
-      return date.toISOString().slice(0, 16); // Get YYYY-MM-DDThh:mm format
-    };
+    const utcDate = new Date(content.scheduledTime);
+    const localDate = new Date(utcDate);
+    
+    // Format for datetime-local input
+    const formattedDate = localDate.toISOString().slice(0, 16);
 
     setEditingContent(content);
     setContent(content.content);
-    setScheduledTime(formatDateForInput(content.scheduledTime));
+    setScheduledTime(formattedDate);
     setIsAddingContent(true);
   };
 
@@ -129,10 +135,18 @@ function CampaignDetails({ campaign, onBack }) {
     }
   };
 
-  // When displaying times, convert UTC back to local
+  // Format display time from UTC to local
   const formatDateTime = (utcTime) => {
+    if (!utcTime) return '';
     const date = new Date(utcTime);
-    return date.toLocaleString(); // This will show time in user's local timezone
+    return new Intl.DateTimeFormat('default', {
+      year: 'numeric',
+      month: 'numeric',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: true
+    }).format(date);
   };
 
   return (
