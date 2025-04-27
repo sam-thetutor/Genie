@@ -59,6 +59,7 @@ function CampaignDetails({ campaign, onBack }) {
         status: 'pending'
       };
 
+      
 
       if (editingContent) {
         await updateContent(editingContent._id, newContent);
