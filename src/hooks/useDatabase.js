@@ -3,7 +3,7 @@ import axios from 'axios';
 import { useAuth } from '@nfid/identitykit/react';
 import { toast } from 'react-hot-toast';
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://geniebackend-80b3e746aefb.herokuapp.com/api';
 
 export function useDatabase() {
   const { user } = useAuth();
