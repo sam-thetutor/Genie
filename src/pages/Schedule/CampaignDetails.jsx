@@ -49,20 +49,11 @@ function CampaignDetails({ campaign, onBack }) {
     }
 
     try {
-      // Convert local time to UTC before sending
-      const localDate = new Date(scheduledTime);
-      const utcDate = new Date(Date.UTC(
-        localDate.getFullYear(),
-        localDate.getMonth(),
-        localDate.getDate(),
-        localDate.getHours(),
-        localDate.getMinutes()
-      ));
-
+      // Send exact time without timezone conversion
       const newContent = {
         campaignId: campaign._id,
         content,
-        scheduledTime: utcDate.toISOString(),
+        scheduledTime: scheduledTime, // Send the exact time selected
         status: 'pending'
       };
 
@@ -135,18 +126,18 @@ function CampaignDetails({ campaign, onBack }) {
     }
   };
 
-  // Format display time from UTC to local
-  const formatDateTime = (utcTime) => {
-    if (!utcTime) return '';
-    const date = new Date(utcTime);
-    return new Intl.DateTimeFormat('default', {
+  // Display exact time without timezone conversion
+  const formatDateTime = (time) => {
+    if (!time) return '';
+    const date = new Date(time);
+    return date.toLocaleString('default', {
       year: 'numeric',
       month: 'numeric',
       day: 'numeric',
       hour: '2-digit',
       minute: '2-digit',
-      hour12: true
-    }).format(date);
+      hour12: false
+    });
   };
 
   return (
