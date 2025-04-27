@@ -50,8 +50,6 @@ function CampaignDetails({ campaign, onBack }) {
 
     const localDate = new Date(scheduledTime);
     const gmtTime = localDate.toISOString();
-
-    console.log("GMT Time: ", gmtTime,localDate,scheduledTime);
     try {
       // Send exact time without timezone conversion
       const newContent = {
@@ -61,8 +59,7 @@ function CampaignDetails({ campaign, onBack }) {
         status: 'pending'
       };
 
-      console.log("New Content: ", newContent);
-      //  throw new Error("Test Error");
+
       if (editingContent) {
         await updateContent(editingContent._id, newContent);
       } else {
@@ -138,7 +135,7 @@ function CampaignDetails({ campaign, onBack }) {
     const date = new Date(time);
     console.log("Date hhhhhh : ", date,time);
     
-    let formattedDate = time.toLocaleString('default', {
+    let formattedDate = date.toLocaleString('default', {
       year: 'numeric',
       month: 'numeric',
       day: 'numeric',
